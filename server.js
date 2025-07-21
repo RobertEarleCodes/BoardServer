@@ -369,26 +369,37 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.listen(PORT, HOST, () => {
   const localIP = getLocalIP();
-  console.log('='.repeat(60));
+  console.log('='.repeat(70));
   console.log('🚀 Board Management Server Started Successfully!');
-  console.log('='.repeat(60));
+  console.log('='.repeat(70));
+  
+  console.log(`🖥️  Server binding: ${HOST}:${PORT}`);
+  console.log(`📍 Mode: ${ENVIRONMENT}`);
+  console.log('');
+  
+  console.log('📱 Access URLs:');
+  console.log(`   � Local: http://localhost:${PORT}`);
+  console.log(`   🏠 LAN: http://${localIP}:${PORT}`);
   
   if (ENVIRONMENT === 'production' || ENVIRONMENT === 'global') {
-    console.log(`🌍 Global access: http://0.0.0.0:${PORT}`);
-    console.log(`📡 Server running in ${ENVIRONMENT} mode`);
-    console.log('⚠️  SECURITY WARNING: Server is accessible from the internet!');
-    console.log('🔒 Make sure your firewall and security settings are configured');
+    console.log('');
+    console.log('🌍 FOR GLOBAL/INTERNET ACCESS:');
+    console.log('   1. Find your public IP: curl ifconfig.me');
+    console.log('   2. Configure router port forwarding (port 3000)');
+    console.log('   3. Configure firewall: sudo ufw allow 3000');
+    console.log('   4. Access via: http://YOUR_PUBLIC_IP:3000');
+    console.log('');
+    console.log('⚠️  SECURITY WARNING: Server will be accessible from internet!');
+    console.log('� Security features enabled: rate limiting, security headers');
   } else {
-    console.log(`🏠 Local access: http://localhost:${PORT}`);
-    console.log(`🏠 LAN access: http://${localIP}:${PORT}`);
-    console.log('📍 Server running in local/development mode');
+    console.log('   🌐 Network: Accessible on local network only');
   }
   
-  console.log('='.repeat(60));
+  console.log('');
   console.log('📋 Available endpoints:');
   console.log('   • / - Board Management Interface');
-  console.log('   • /api/boards - Board Management API');
+  console.log('   • /api/boards - Board Management API');  
   console.log('   • /api/routes - Route Management API');
-  console.log('='.repeat(60));
+  console.log('='.repeat(70));
   console.log('Use Ctrl+C to stop the server');
 });
