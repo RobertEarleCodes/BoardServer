@@ -1,8 +1,8 @@
 # Board Server for Raspberry Pi
 
-A web-based interactive board management system that allows you to create zones and routes on a board image. Perfect for climbing route planning, game boards, or any spatial reference system.
+A professional web-based interactive board management system that allows you to create zones and routes on a board image. Perfect for climbing route planning, game boards, or any spatial reference system.
 
-## Features
+## 🌟 Features
 
 - **Set Board Mode**: Click anywhere on the board to place blue zones
 - **Set Route Mode**: Select zones to create named routes
@@ -10,10 +10,13 @@ A web-based interactive board management system that allows you to create zones 
 - **Route Management**: Save, view, and delete routes
 - **Local Storage**: All data is saved locally on the server
 - **LAN Access**: Accessible from any device on your local network
+- **Global Access**: Deploy anywhere with internet connectivity
 - **Zero Setup**: Just install dependencies and run!
+- **Security**: Built-in security headers and rate limiting for global deployment
 
-## Quick Start
+## 🚀 Quick Start
 
+### Local Development
 1. **Install Dependencies**:
    ```bash
    npm install
@@ -22,13 +25,30 @@ A web-based interactive board management system that allows you to create zones 
 2. **Start the Server**:
    ```bash
    npm start
+   # or for explicit local mode
+   npm run start:local
    ```
 
 3. **Access the Application**:
    - Local: http://localhost:3000
    - LAN: http://YOUR_PI_IP:3000
 
-## How to Use
+### Global Deployment
+1. **Setup for Global Access**:
+   ```bash
+   ./setup-global.sh
+   ```
+
+2. **Start Global Server**:
+   ```bash
+   npm run start:global
+   ```
+
+3. **Access Globally**:
+   - Your server will be accessible from anywhere on the internet
+   - See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment options
+
+## 🎯 How to Use
 
 ### Set Board Mode
 1. Click "Set Board" button

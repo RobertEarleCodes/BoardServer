@@ -6,7 +6,9 @@ const os = require('os');
 const multer = require('multer');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
+const ENVIRONMENT = process.env.NODE_ENV || 'local';
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -38,6 +40,42 @@ const upload = multer({
 
 // Middleware
 app.use(bodyParser.json());
+
+// Security middleware for global deployment
+if (ENVIRONMENT === 'production' || ENVIRONMENT === 'global') {
+  // Add security headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
+  
+  // Basic rate limiting (simple implementation)
+  const requestCounts = new Map();
+  app.use((req, res, next) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    const currentTime = Date.now();
+    const windowStart = currentTime - 60000; // 1 minute window
+    
+    if (!requestCounts.has(clientIP)) {
+      requestCounts.set(clientIP, []);
+    }
+    
+    const requests = requestCounts.get(clientIP);
+    const recentRequests = requests.filter(time => time > windowStart);
+    
+    if (recentRequests.length > 100) { // Max 100 requests per minute
+      return res.status(429).json({ error: 'Too many requests' });
+    }
+    
+    recentRequests.push(currentTime);
+    requestCounts.set(clientIP, recentRequests);
+    next();
+  });
+}
+
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads')); // Serve uploaded images
 
@@ -329,14 +367,28 @@ if (!fs.existsSync(uploadsDir)) {
   console.log('Created uploads directory');
 }
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, HOST, () => {
   const localIP = getLocalIP();
-  console.log('='.repeat(50));
-  console.log('Board Server Started Successfully!');
-  console.log('='.repeat(50));
-  console.log(`Local access: http://localhost:${PORT}`);
-  console.log(`LAN access: http://${localIP}:${PORT}`);
-  console.log('='.repeat(50));
-  console.log('The server is accessible from any device on your local network');
+  console.log('='.repeat(60));
+  console.log('🚀 Board Management Server Started Successfully!');
+  console.log('='.repeat(60));
+  
+  if (ENVIRONMENT === 'production' || ENVIRONMENT === 'global') {
+    console.log(`🌍 Global access: http://0.0.0.0:${PORT}`);
+    console.log(`📡 Server running in ${ENVIRONMENT} mode`);
+    console.log('⚠️  SECURITY WARNING: Server is accessible from the internet!');
+    console.log('🔒 Make sure your firewall and security settings are configured');
+  } else {
+    console.log(`🏠 Local access: http://localhost:${PORT}`);
+    console.log(`🏠 LAN access: http://${localIP}:${PORT}`);
+    console.log('📍 Server running in local/development mode');
+  }
+  
+  console.log('='.repeat(60));
+  console.log('📋 Available endpoints:');
+  console.log('   • / - Board Management Interface');
+  console.log('   • /api/boards - Board Management API');
+  console.log('   • /api/routes - Route Management API');
+  console.log('='.repeat(60));
   console.log('Use Ctrl+C to stop the server');
 });
