@@ -102,6 +102,20 @@ When running globally, the server automatically enables:
 - Rate limiting (100 requests per minute per IP)
 - Frame options to prevent clickjacking
 
+### Firewall Setup:
+```bash
+# Option 1: Use our firewall setup script
+sudo ./setup-firewall.sh
+
+# Option 2: Manual UFW setup
+sudo apt install ufw
+sudo ufw allow 3000
+sudo ufw enable
+
+# Option 3: Check firewall status
+./diagnose-network.sh
+```
+
 ### Additional Security Recommendations:
 1. **Use HTTPS** in production
 2. **Set up firewall rules**

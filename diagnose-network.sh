@@ -57,6 +57,21 @@ if command -v ufw >/dev/null 2>&1; then
     fi
 else
     echo "   UFW: Not installed"
+    
+    # Check iptables instead
+    if command -v iptables >/dev/null 2>&1; then
+        echo "   Using iptables instead"
+        if sudo iptables -L INPUT 2>/dev/null | grep -q "3000"; then
+            echo "✅ Port 3000: Found in iptables rules"
+        else
+            echo "⚠️  Port 3000: Not found in iptables rules"
+            echo "   Install UFW: sudo apt install ufw"
+            echo "   Or configure iptables manually"
+        fi
+    else
+        echo "   No common firewall tools found"
+        echo "   Install UFW: sudo apt install ufw"
+    fi
 fi
 
 echo ""
