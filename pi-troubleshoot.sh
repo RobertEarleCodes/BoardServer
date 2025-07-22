@@ -163,13 +163,98 @@ if command_exists journalctl; then
 fi
 echo
 
+echo "=== FIREWALL CHECK ==="
+echo "Checking firewall status..."
+
+# Check UFW status
+if command_exists ufw; then
+    UFW_STATUS=$(sudo ufw status numbered 2>/dev/null)
+    echo "UFW Status:"
+    echo "$UFW_STATUS"
+    
+    if echo "$UFW_STATUS" | grep -q "3000"; then
+        echo "✅ Port 3000 is allowed in UFW"
+    else
+        echo "❌ Port 3000 NOT found in UFW rules"
+        echo "   Fix: sudo ufw allow 3000"
+    fi
+else
+    echo "UFW not available"
+fi
+
+# Check iptables
+if command_exists iptables; then
+    echo
+    echo "iptables INPUT rules:"
+    sudo iptables -L INPUT -n --line-numbers | grep -E "(3000|ACCEPT|DROP|REJECT)" || echo "No relevant iptables rules found"
+fi
+echo
+
+# Check if server is actually listening and on which interface
+echo "=== SERVER BINDING CHECK ==="
+if command_exists netstat; then
+    echo "Checking what's listening on port 3000:"
+    LISTEN_CHECK=$(netstat -tulpn 2>/dev/null | grep ":3000")
+    if [ -n "$LISTEN_CHECK" ]; then
+        echo "$LISTEN_CHECK"
+        if echo "$LISTEN_CHECK" | grep -q "0.0.0.0:3000"; then
+            echo "✅ Server is bound to all interfaces (0.0.0.0)"
+        elif echo "$LISTEN_CHECK" | grep -q "127.0.0.1:3000"; then
+            echo "❌ Server is only bound to localhost (127.0.0.1)"
+            echo "   This prevents external access!"
+        elif echo "$LISTEN_CHECK" | grep -q ":::3000"; then
+            echo "✅ Server is bound to IPv6 all interfaces"
+        fi
+    else
+        echo "❌ No process listening on port 3000"
+        echo "   Make sure server is running: node server.js"
+    fi
+elif command_exists ss; then
+    echo "Checking what's listening on port 3000:"
+    LISTEN_CHECK=$(ss -tulpn | grep ":3000")
+    if [ -n "$LISTEN_CHECK" ]; then
+        echo "$LISTEN_CHECK"
+    else
+        echo "❌ No process listening on port 3000"
+    fi
+fi
+echo
+
+echo "=== CONNECTIVITY TEST ==="
+# Test local connectivity
+if command_exists curl; then
+    echo "Testing local connectivity:"
+    LOCAL_TEST=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null)
+    if [ "$LOCAL_TEST" = "200" ]; then
+        echo "✅ localhost:3000 responds (HTTP $LOCAL_TEST)"
+    else
+        echo "❌ localhost:3000 not responding (HTTP $LOCAL_TEST)"
+    fi
+    
+    # Test via local IP
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    IP_TEST=$(curl -s -o /dev/null -w "%{http_code}" http://$LOCAL_IP:3000 2>/dev/null)
+    if [ "$IP_TEST" = "200" ]; then
+        echo "✅ $LOCAL_IP:3000 responds (HTTP $IP_TEST)"
+    else
+        echo "❌ $LOCAL_IP:3000 not responding (HTTP $IP_TEST)"
+        echo "   This indicates a binding or firewall issue"
+    fi
+else
+    echo "curl not available for connectivity testing"
+fi
+echo
+
 echo "=== SUGGESTED FIXES ==="
-echo "1. If port is in use: sudo kill -9 <process_id>"
-echo "2. If dependencies missing: rm -rf node_modules && npm install"
-echo "3. If permission issues: sudo chown -R \$USER:users ."
-echo "4. If memory issues: sudo systemctl stop unnecessary-services"
-echo "5. If Node.js too old: Update Node.js to v18+"
-echo "6. Try different port: PORT=3001 node server.js"
+echo "1. If server only binds to localhost: Check server.js HOST setting"
+echo "2. If port is in use: sudo kill -9 <process_id>"
+echo "3. If dependencies missing: rm -rf node_modules && npm install"
+echo "4. If permission issues: sudo chown -R \$USER:users ."
+echo "5. If memory issues: sudo systemctl stop unnecessary-services"
+echo "6. If Node.js too old: Update Node.js to v18+"
+echo "7. Try different port: PORT=3001 node server.js"
+echo "8. Disable firewall temporarily: sudo ufw disable"
+echo "9. Check server binding: grep -n 'HOST.*=' server.js"
 echo
 
 echo "=== MANUAL TEST ==="
