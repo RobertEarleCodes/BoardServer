@@ -1,13 +1,10 @@
 {
   "name": "board-server",
   "version": "1.0.0",
-  "description": "Interactive board zone and route management server for Raspberry Pi",
+  "description": "Interactive board zone and route management server for local network (LAN) access",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start:local": "NODE_ENV=local node server.js",
-    "start:global": "NODE_ENV=production node server.js",
-    "start:dev": "NODE_ENV=development node server.js",
     "dev": "node server.js"
   },
   "keywords": [

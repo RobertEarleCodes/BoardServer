@@ -94,12 +94,22 @@ public
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# Application specific
+# Application specific - Board data and uploads
 board_data.json
 uploads/*.jpg
 uploads/*.png
 uploads/*.gif
 uploads/*.jpeg
+uploads/*.webp
+uploads/*.bmp
+
+# Backup files
+server-original.js
+*.backup
+
+# Log files
+*.log
+logs/
 
 # macOS
 .DS_Store
