@@ -255,6 +255,19 @@ echo "6. If Node.js too old: Update Node.js to v18+"
 echo "7. Try different port: PORT=3001 node server.js"
 echo "8. Disable firewall temporarily: sudo ufw disable"
 echo "9. Check server binding: grep -n 'HOST.*=' server.js"
+echo "10. Run network fix: ./pi-fix-network.sh"
+echo
+
+echo "=== QUICK NETWORK FIX ==="
+echo "Most common Pi LAN access issues:"
+echo "1. Firewall blocking port 3000"
+echo "2. Server binding to localhost only"
+echo "3. Port already in use"
+echo
+echo "Try this sequence:"
+echo "  ./pi-fix-network.sh"
+echo "  node server.js"
+echo "  # Test from another device: http://$(hostname -I | awk '{print $1}'):3000"
 echo
 
 echo "=== MANUAL TEST ==="
