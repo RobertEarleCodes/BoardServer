@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: #ffffff;
+            border-bottom: 2px solid #e9ecef;
+            padding: 24px 32px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: none;
+            letter-spacing: 0;
+            background: transparent;
+            color: #6c757d;
+        }
+
+        .mode-btn.active {
+            background: #007bff;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.25);
+        }
+
+        .mode-btn:not(.active):hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            padding: 32px;
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .board-section {
+            flex: 2;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .board-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .board-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: #f8f9fa;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 16px;
+            border: 2px dashed #dee2e6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .board-image:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .zone {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #007bff;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+        }
+
+        .zone:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+            border-width: 3px;
+        }
+
+        .zone.selected {
+            background: #ffc107;
+            border-color: #ffc107;
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        .zone.route-active {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .routes-section {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-group {
+            margin-bottom: 24px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-primary:disabled {
+            background: #6c757d;
+            border-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            border-color: #545b62;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            border-color: #d39e00;
+        }
+
+        .form-control {
+            padding: 12px 16px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .route-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .route-form input {
+            flex: 1;
+        }
+
+        .routes-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .route-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .route-item:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .route-item.active {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .route-meta {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .route-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .status-message {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            transform: translateX(100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-message.success {
+            background: #28a745;
+        }
+
+        .status-message.error {
+            background: #dc3545;
+        }
+
+        .status-message.show {
+            transform: translateX(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 16px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .route-form {
+                flex-direction: column;
+            }
+            
+            .control-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Board Management System</h1>
+            <div class="mode-selector">
+                <button class="mode-btn active" id="setBoardBtn">Configure Board</button>
+                <button class="mode-btn" id="setRouteBtn" disabled>Create Routes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="board-section">
+            <div class="section-header">
+                <div class="section-title">Board Configuration</div>
+                <div class="section-description" id="instructions">
+                    Upload a board image first, then configure zones on the image. Zones will be saved with the board.
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-row">
+                    <button class="btn btn-warning" id="clearZonesBtn" style="display: none;">Clear All Zones</button>
+                    <button class="btn btn-primary" id="saveZonesBtn" style="display: none;">Save Zones</button>
+                    <button class="btn btn-danger" id="removeImageBtn" style="display: none;">Remove Board</button>
+                </div>
+            </div>
+
+            <div class="board-container">
+                <div class="board-image" id="boardImage">
+                    Click to upload board image to begin
+                </div>
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <div class="routes-section">
+            <div class="section-header">
+                <div class="section-title">Route Management</div>
+                <div class="section-description" id="routeDescription">Configure zones on the board first, then create routes using those zones</div>
+                
+                <div class="route-form" id="routeForm" style="display: none;">
+                    <input type="text" class="form-control" id="routeName" placeholder="Route name">
+                    <button class="btn btn-primary" id="saveRouteBtn" disabled>Save Route</button>
+                    <button class="btn btn-secondary" id="clearSelectionBtn">Clear Selection</button>
+                </div>
+            </div>
+            
+            <div class="routes-list" id="routesList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">�</div>
+                    <div>No board configured</div>
+                    <div style="margin-top: 8px; font-size: 12px;">Upload a board image and configure zones to start creating routes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <script>
+        class BoardManager {
+            constructor() {
+                this.mode = 'configureBoard';
+                this.currentBoard = null;
+                this.zones = [];
+                this.selectedZones = [];
+                this.routes = [];
+                this.activeRoute = null;
+                this.zoneCounter = 0;
+                this.unsavedChanges = false;
+                
+                this.initializeElements();
+                this.attachEventListeners();
+                this.loadCurrentBoard();
+            }
+
+            initializeElements() {
+                this.setBoardBtn = document.getElementById('setBoardBtn');
+                this.setRouteBtn = document.getElementById('setRouteBtn');
+                this.boardContainer = document.getElementById('boardImage');
+                this.routeForm = document.getElementById('routeForm');
+                this.routeName = document.getElementById('routeName');
+                this.saveRouteBtn = document.getElementById('saveRouteBtn');
+                this.clearSelectionBtn = document.getElementById('clearSelectionBtn');
+                this.routesList = document.getElementById('routesList');
+                this.instructions = document.getElementById('instructions');
+                this.routeDescription = document.getElementById('routeDescription');
+                this.clearZonesBtn = document.getElementById('clearZonesBtn');
+                this.saveZonesBtn = document.getElementById('saveZonesBtn');
+                this.removeImageBtn = document.getElementById('removeImageBtn');
+                this.imageUpload = document.getElementById('imageUpload');
+                this.statusMessage = document.getElementById('statusMessage');
+            }
+
+            attachEventListeners() {
+                this.setBoardBtn.addEventListener('click', () => this.setMode('configureBoard'));
+                this.setRouteBtn.addEventListener('click', () => this.setMode('createRoutes'));
+                this.boardContainer.addEventListener('click', (e) => this.handleBoardClick(e));
+                this.saveRouteBtn.addEventListener('click', () => this.saveRoute());
+                this.clearSelectionBtn.addEventListener('click', () => this.clearSelection());
+                this.clearZonesBtn.addEventListener('click', () => this.clearAllZones());
+                this.saveZonesBtn.addEventListener('click', () => this.saveZones());
+                this.removeImageBtn.addEventListener('click', () => this.removeBoard());
+                this.routeName.addEventListener('input', () => this.updateSaveButton());
+                this.imageUpload.addEventListener('change', (e) => this.handleImageUpload(e));
+                
+                // Allow clicking on the board image to upload
+                this.boardContainer.addEventListener('click', (e) => {
+                    if (e.target === this.boardContainer && !this.currentBoard) {
+                        this.imageUpload.click();
+                    }
+                });
+            }
+
+            setMode(mode) {
+                this.mode = mode;
+                this.clearSelection();
+                
+                // Update button states
+                this.setBoardBtn.classList.toggle('active', mode === 'configureBoard');
+                this.setRouteBtn.classList.toggle('active', mode === 'createRoutes');
+                
+                // Update form visibility
+                this.routeForm.style.display = mode === 'createRoutes' ? 'flex' : 'none';
+                
+                // Update instructions
+                if (mode === 'configureBoard') {
+                    if (!this.currentBoard) {
+                        this.instructions.innerHTML = 'Upload a board image first, then configure zones on the image. Zones will be saved with the board.';
+                    } else {
+                        this.instructions.innerHTML = 'Click anywhere on the board to place zones. Use "Save Zones" to save your configuration.';
+                    }
+                } else {
+                    this.instructions.innerHTML = 'Select zones by clicking them to create a route. Selected zones will be highlighted in yellow.';
+                }
+                
+                this.updateZoneDisplay();
+                this.updateUI();
+            }
+
+            updateUI() {
+                const hasBoard = !!this.currentBoard;
+                const hasZones = this.zones.length > 0;
+                
+                // Enable/disable route mode based on whether we have zones
+                this.setRouteBtn.disabled = !hasZones;
+                
+                // Show/hide controls based on state
+                this.clearZonesBtn.style.display = hasBoard && hasZones ? 'inline-block' : 'none';
+                this.saveZonesBtn.style.display = hasBoard && this.unsavedChanges ? 'inline-block' : 'none';
+                this.removeImageBtn.style.display = hasBoard ? 'inline-block' : 'none';
+                
+                // Update route description
+                if (!hasBoard) {
+                    this.routeDescription.innerHTML = 'Configure zones on the board first, then create routes using those zones';
+                } else if (!hasZones) {
+                    this.routeDescription.innerHTML = 'Add zones to the board before creating routes';
+                } else {
+                    this.routeDescription.innerHTML = 'Select zones to create routes. Routes are saved with this board configuration.';
+                }
+            }
+
+            handleImageUpload(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('boardImage', file);
+                    
+                    this.showStatus('Uploading board image...', 'success');
+                    
+                    fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.currentBoard = data.board;
+                            this.zones = [];
+                            this.routes = [];
+                            this.zoneCounter = 0;
+                            this.unsavedChanges = false;
+                            this.displayBoard();
+                            this.updateUI();
+                            this.showStatus('Board uploaded successfully! Now add zones by clicking on the image.', 'success');
+                        } else {
+                            throw new Error(data.error || 'Upload failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error uploading image:', error);
+                        this.showStatus('Error uploading image!', 'error');
+                    });
+                }
+            }
+
+            displayBoard() {
+                if (this.currentBoard && this.currentBoard.imagePath) {
+                    this.boardContainer.style.backgroundImage = `url(${this.currentBoard.imagePath})`;
+                    this.boardContainer.style.backgroundSize = 'contain';
+                    this.boardContainer.style.backgroundRepeat = 'no-repeat';
+                    this.boardContainer.style.backgroundPosition = 'center';
+                    this.boardContainer.innerHTML = '';
+                } else {
+                    this.boardContainer.style.backgroundImage = '';
+                    this.boardContainer.innerHTML = 'Click to upload board image to begin';
+                }
+            }
+
+            handleBoardClick(e) {
+                if (e.target !== this.boardContainer) return;
+                
+                if (!this.currentBoard) {
+                    this.imageUpload.click();
+                    return;
+                }
+                
+                if (this.mode === 'configureBoard') {
+                    const rect = this.boardContainer.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    this.addZone(x, y);
+                }
+            }
+
+            addZone(x, y) {
+                const zone = {
+                    id: ++this.zoneCounter,
+                    x: x,
+                    y: y
+                };
+                
+                this.zones.push(zone);
+                this.unsavedChanges = true;
+                this.renderZones();
+                this.updateUI();
+                this.showStatus('Zone added. Remember to save your configuration!', 'success');
+            }
+
+            saveZones() {
+                if (!this.currentBoard) return;
+                
+                fetch('/api/zones', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ zones: this.zones })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.unsavedChanges = false;
+                        this.updateUI();
+                        this.showStatus('Zones saved successfully!', 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving zones:', error);
+                    this.showStatus('Error saving zones!', 'error');
+                });
+            }
+
+            removeBoard() {
+                if (confirm('Are you sure you want to remove this board? This will delete all zones and routes associated with it.')) {
+                    console.log('Starting board removal...');
+                    fetch('/api/board-image', {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response ok:', response.ok);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Response data:', data);
+                        if (data.success) {
+                            console.log('Board removal successful, updating UI...');
+                            this.currentBoard = null;
+                            this.zones = [];
+                            this.routes = [];
+                            this.selectedZones = [];
+                            this.activeRoute = null;
+                            this.zoneCounter = 0;
+                            this.unsavedChanges = false;
+                            this.displayBoard();
+                            this.renderZones();
+                            this.renderRoutes();
+                            this.updateUI();
+                            this.setMode('configureBoard');
+                            this.showStatus('Board removed successfully!', 'success');
+                            console.log('UI updated successfully');
+                        } else {
+                            console.error('Server returned success=false:', data);
+                            this.showStatus('Error removing board: ' + (data.error || 'Unknown error'), 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing board:', error);
+                        this.showStatus('Error removing board: ' + error.message, 'error');
+                    });
+                } else {
+                    console.log('Board removal cancelled by user');
+                }
+            }
+
+            renderZones() {
+                // Remove existing zone elements
+                const existingZones = this.boardContainer.querySelectorAll('.zone');
+                existingZones.forEach(zone => zone.remove());
+
+                // Add zones
+                this.zones.forEach(zone => {
+                    const zoneElement = document.createElement('div');
+                    zoneElement.className = 'zone';
+                    zoneElement.style.left = `${zone.x}%`;
+                    zoneElement.style.top = `${zone.y}%`;
+                    zoneElement.dataset.zoneId = zone.id;
+                    
+                    zoneElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.handleZoneClick(zone.id);
+                    });
+                    
+                    this.boardContainer.appendChild(zoneElement);
+                });
+                
+                this.updateZoneDisplay();
+            }
+
+            handleZoneClick(zoneId) {
+                if (this.mode === 'createRoutes') {
+                    const index = this.selectedZones.indexOf(zoneId);
+                    if (index === -1) {
+                        this.selectedZones.push(zoneId);
+                    } else {
+                        this.selectedZones.splice(index, 1);
+                    }
+                    this.updateZoneDisplay();
+                    this.updateSaveButton();
+                }
+            }
+
+            clearAllZones() {
+                if (confirm('Are you sure you want to clear all zones? This will also delete all routes for this board.')) {
+                    this.zones = [];
+                    this.selectedZones = [];
+                    this.activeRoute = null;
+                    this.zoneCounter = 0;
+                    this.unsavedChanges = true;
+                    this.renderZones();
+                    this.updateUI();
+                    this.showStatus('All zones cleared. Remember to save!', 'success');
+                }
+            }
+
+            updateZoneDisplay() {
+                const zoneElements = this.boardContainer.querySelectorAll('.zone');
+                zoneElements.forEach(element => {
+                    const zoneId = parseInt(element.dataset.zoneId);
+                    element.classList.remove('selected', 'route-active');
+                    
+                    if (this.mode === 'createRoutes' && this.selectedZones.includes(zoneId)) {
+                        element.classList.add('selected');
+                    } else if (this.activeRoute && this.activeRoute.zones.includes(zoneId)) {
+                        element.classList.add('route-active');
+                    }
+                });
+            }
+
+            updateSaveButton() {
+                this.saveRouteBtn.disabled = !this.routeName.value.trim() || this.selectedZones.length === 0;
+            }
+
+            saveRoute() {
+                const name = this.routeName.value.trim();
+                if (!name || this.selectedZones.length === 0) return;
+
+                const routeData = {
+                    name: name,
+                    selectedZones: [...this.selectedZones]
+                };
+
+                fetch('/api/routes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(routeData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.loadCurrentBoard();
+                        this.routeName.value = '';
+                        this.clearSelection();
+                        this.showStatus('Route saved successfully!', 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving route:', error);
+                    this.showStatus('Error saving route!', 'error');
+                });
+            }
+
+            clearSelection() {
+                this.selectedZones = [];
+                this.activeRoute = null;
+                this.updateZoneDisplay();
+                this.updateSaveButton();
+                this.renderRoutes();
+            }
+
+            renderRoutes() {
+                if (!this.currentBoard || this.routes.length === 0) {
+                    let message = 'No board configured';
+                    let details = 'Upload a board image and configure zones to start creating routes';
+                    
+                    if (this.currentBoard && this.zones.length === 0) {
+                        message = 'No zones configured';
+                        details = 'Add zones to the board before creating routes';
+                    } else if (this.currentBoard && this.zones.length > 0) {
+                        message = 'No routes created';
+                        details = 'Select zones and create your first route';
+                    }
+                    
+                    this.routesList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📍</div>
+                            <div>${message}</div>
+                            <div style="margin-top: 8px; font-size: 12px;">${details}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.routesList.innerHTML = '';
+                this.routes.forEach(route => {
+                    const routeElement = document.createElement('div');
+                    routeElement.className = 'route-item';
+                    if (this.activeRoute && this.activeRoute.name === route.name) {
+                        routeElement.classList.add('active');
+                    }
+                    
+                    routeElement.innerHTML = `
+                        <div class="route-info">
+                            <div class="route-name">${route.name}</div>
+                            <div class="route-meta">${route.zones.length} zones configured</div>
+                        </div>
+                        <div class="route-actions">
+                            <button class="btn btn-danger btn-small" onclick="boardManager.deleteRoute('${route.name}')">Delete</button>
+                        </div>
+                    `;
+                    
+                    routeElement.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('btn')) {
+                            this.showRoute(route);
+                        }
+                    });
+                    
+                    this.routesList.appendChild(routeElement);
+                });
+            }
+
+            showRoute(route) {
+                this.activeRoute = route;
+                this.selectedZones = [];
+                this.updateZoneDisplay();
+                this.renderRoutes();
+                this.showStatus(`Displaying route: ${route.name}`, 'success');
+            }
+
+            deleteRoute(routeName) {
+                if (confirm(`Are you sure you want to delete the route "${routeName}"?`)) {
+                    fetch(`/api/routes/${encodeURIComponent(routeName)}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.loadCurrentBoard();
+                            this.clearSelection();
+                            this.showStatus('Route deleted successfully!', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting route:', error);
+                        this.showStatus('Error deleting route!', 'error');
+                    });
+                }
+            }
+
+            showStatus(message, type) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message ${type} show`;
+                
+                setTimeout(() => {
+                    this.statusMessage.classList.remove('show');
+                }, 3000);
+            }
+
+            loadCurrentBoard() {
+                fetch('/api/current-board')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.board) {
+                            this.currentBoard = data.board;
+                            this.zones = data.board.zones || [];
+                            this.routes = data.routes || [];
+                            
+                            if (this.zones.length > 0) {
+                                this.zoneCounter = Math.max(...this.zones.map(z => z.id));
+                            }
+                            
+                            this.displayBoard();
+                            this.renderZones();
+                            this.renderRoutes();
+                            this.updateUI();
+                            
+                            if (this.zones.length > 0) {
+                                this.setMode('createRoutes');
+                            }
+                        } else {
+                            this.updateUI();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading board:', error);
+                        this.showStatus('Error loading board data!', 'error');
+                    });
+            }
+        }
+
+        // Initialize the board manager when the page loads
+        let boardManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            boardManager = new BoardManager();
+        });
+    </script>
+</body>
+</html>
