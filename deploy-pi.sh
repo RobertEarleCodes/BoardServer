@@ -47,17 +47,3 @@ echo
 echo "========================================="
 echo "✅ Pi Deployment Complete!"
 echo "========================================="
-echo
-echo "🚀 Start your server with:"
-echo "   npm start"
-echo "   # or"
-echo "   node server.js"
-echo
-echo "🌐 Access your server at:"
-echo "   Local: http://localhost:3000"
-echo "   LAN: http://$(hostname -I | awk '{print $1}'):3000"
-echo
-echo "📋 Troubleshooting:"
-echo "   ./pi-troubleshoot.sh"
-echo
-echo "========================================="
